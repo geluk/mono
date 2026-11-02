@@ -2,7 +2,12 @@
   "Releases": [
     {
       "Id": "GcRootsFix",
-      "Version": "2019.4.40f1-gc-roots-fix.1",
+      "Version": "0.0.1",
+      "DownloadUrl": "https://github.com/geluk/mono/releases/download/2019.4.40f1-gc-roots-fix.1/mono-2.0-bdwgc.dll"
+    },
+    {
+      "Id": "GcRootsFixDebug",
+      "Version": "0.0.1",
       "DownloadUrl": "https://github.com/geluk/mono/releases/download/2019.4.40f1-gc-roots-fix.1/mono-2.0-bdwgc.dll"
     }
   ]
