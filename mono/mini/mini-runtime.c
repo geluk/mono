@@ -1770,18 +1770,59 @@ void
 mono_enable_jit_map (void)
 {
 	if (!perf_map_file) {
+#ifdef HOST_WIN32
+		/*
+		 * Generates a file that contains the memory addresses of JITed methods and
+		 * their plumbing (trampolines and wrappers), so that external profilers
+		 * can cleanly resolve symbols on stacks that point into C#.
+		 *
+		 * The file is written to MONO_JIT_MAP_DIR\mono-jit-<pid>.map, with each line
+		 * holding a JIT entry, containing `<start> <size> <qpc> <name>`, allowing
+		 * consumers to tell apart different methods that occupied the same address
+		 * over time. Note that `start` and `size` are in hex, but `qpc` is decimal.
+		 * The first line, prefixed by `#`, holds some metadata (PID and QPC frequency).
+		 */
+		LARGE_INTEGER freq;
+		char *dir = g_getenv ("MONO_JIT_MAP_DIR");
+		char *name = g_strdup_printf ("%s\\mono-jit-%d.map", dir ? dir : ".", mono_process_current_pid ());
+		gunichar2 *wname = u8to16 (name);
+
+		perf_map_file = _wfopen ((const wchar_t *)wname, L"w");
+		if (perf_map_file) {
+			QueryPerformanceFrequency (&freq);
+			fprintf (perf_map_file, "# mono-jit-map pid=%d qpc-freq=%lld\n", mono_process_current_pid (), (long long)freq.QuadPart);
+			fflush (perf_map_file);
+		} else {
+			g_warning ("Unable to open JIT map file '%s'.", name);
+		}
+
+		g_free (wname);
+		g_free (name);
+		g_free (dir);
+#else
 		char name [64];
 		g_snprintf (name, sizeof (name), "/tmp/perf-%d.map", getpid ());
 		unlink (name);
 		perf_map_file = fopen (name, "w");
+#endif
 	}
 }
 
 void
 mono_emit_jit_tramp (void *start, int size, const char *desc)
 {
-	if (perf_map_file)
+	if (perf_map_file) {
+#ifdef HOST_WIN32
+		LARGE_INTEGER now;
+
+		QueryPerformanceCounter (&now);
+		fprintf (perf_map_file, "%llx %x %lld %s\n", (long long unsigned int)(gsize)start, size, (long long)now.QuadPart, desc);
+		/* Flush to make sure the entry survives a force-killed process, which commonly happens during profiling/debugging sessions */
+		fflush (perf_map_file);
+#else
 		fprintf (perf_map_file, "%llx %x %s\n", (long long unsigned int)(gsize)start, size, desc);
+#endif
+	}
 }
 
 void
@@ -3855,6 +3896,12 @@ mini_init (const char *filename, const char *runtime_version)
 	mono_os_mutex_init_recursive (&jit_mutex);
 
 	mono_cross_helpers_run ();
+
+#ifdef HOST_WIN32
+	/* Alternative path to passing --jitmap. The call is idempotent, so this is fine. */
+	if (g_hasenv ("MONO_JIT_MAP_DIR"))
+		mono_enable_jit_map ();
+#endif
 
 	mono_counters_init ();
 

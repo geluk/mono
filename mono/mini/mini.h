@@ -2809,7 +2809,7 @@ MonoType*   mini_native_type_replace_type (MonoType *type) MONO_LLVM_INTERNAL;
 #define XDEBUG_ENABLED 1
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(HOST_WIN32)
 /* maybe enable also for other systems? */
 #define ENABLE_JIT_MAP 1
 void mono_enable_jit_map (void);
