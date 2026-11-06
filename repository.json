@@ -3,12 +3,14 @@
     {
       "Id": "GcRootsFix",
       "Version": "0.0.1",
-      "DownloadUrl": "https://github.com/geluk/mono/releases/download/2019.4.40f1-gc-roots-fix.1/mono-2.0-bdwgc.dll"
+      "DownloadUrl": "https://github.com/geluk/mono/releases/download/2019.4.40f1-gc-roots-fix.1/mono-2.0-bdwgc.dll",
+      "Sha256Sum": "d6422c41f36a1d2717cc1004e6b5bb5b1d73fef31ad403fb922affea7fd85ffe"
     },
     {
       "Id": "GcRootsFixDebug",
       "Version": "0.0.1",
-      "DownloadUrl": "https://github.com/geluk/mono/releases/download/2019.4.40f1-gc-roots-fix.1/mono-2.0-bdwgc.dll"
+      "DownloadUrl": "https://github.com/geluk/mono/releases/download/2019.4.40f1-gc-roots-fix.1/mono-2.0-bdwgc.dll",
+      "Sha256Sum": "d6422c41f36a1d2717cc1004e6b5bb5b1d73fef31ad403fb922affea7fd85ffe"
     }
   ]
 }
